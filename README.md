@@ -1,1 +1,1 @@
-# Hackathon
+# Smart-Edu-System

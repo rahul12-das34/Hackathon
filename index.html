@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartPath AI - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root{
+      --bg1:#07101c;
+      --bg2:#0b2030;
+      --bg3:#143a4f;
+
+      --card: rgba(255,255,255,0.07);
+      --stroke: rgba(255,255,255,0.14);
+
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+
+      --a1:#00f2fe;
+      --a2:#4facfe;
+
+      --shadow: 0 18px 55px rgba(0,0,0,0.38);
+      --radius: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
+    body{
+      margin:0;
+      font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 680px at 20% 10%, rgba(0,242,254,0.18), transparent 55%),
+        radial-gradient(900px 620px at 85% 28%, rgba(79,172,254,0.16), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x:hidden;
+    }
+
+    .container{
+      width: min(1120px, 92%);
+      margin: 0 auto;
+      padding: 26px 0 56px;
+      position: relative;
+    }
+
+    /* Floating blobs */
+    .blob{
+      position:absolute;
+      width: 360px; height: 360px;
+      border-radius: 999px;
+      filter: blur(30px);
+      opacity: 0.35;
+      z-index: 0;
+      animation: float 7s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .blob.b1{
+      left: -120px; top: 40px;
+      background: radial-gradient(circle at 30% 30%, rgba(0,242,254,0.9), transparent 60%);
+      animation-delay: 0s;
+    }
+    .blob.b2{
+      right: -140px; top: 160px;
+      width: 420px; height: 420px;
+      background: radial-gradient(circle at 35% 35%, rgba(79,172,254,0.9), transparent 60%);
+      animation-delay: 0.6s;
+    }
+
+    @keyframes float{
+      0%{ transform: translate(0,0) scale(1); }
+      50%{ transform: translate(14px,-18px) scale(1.03); }
+      100%{ transform: translate(0,0) scale(1); }
+    }
+
+    .nav{
+      position: relative;
+      z-index: 1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      animation: fadeUp .45s ease both;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .brand-badge{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 16px 40px rgba(79,172,254,0.22);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.88);
+      font-size: 12px;
+      text-decoration:none;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .pill:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.09); }
+
+    .grid{
+      position: relative;
+      z-index: 1;
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+    .card{
+      grid-column: span 12;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      animation: fadeUp .55s ease both;
+    }
+
+    @keyframes fadeUp{
+      from{ opacity:0; transform: translateY(12px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Hero layout */
+    .hero{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    @media (min-width: 900px){
+      .hero{ grid-template-columns: 1.1fr 0.9fr; }
+      .span7{ grid-column: span 7; }
+      .span5{ grid-column: span 5; }
+      .span6{ grid-column: span 6; }
+    }
+
+    h1{
+      margin: 0 0 10px;
+      font-size: clamp(30px, 3.4vw, 46px);
+      line-height: 1.12;
+    }
+    p{
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* Sliding title animation */
+    .slide-in{
+      display:inline-block;
+      opacity:0;
+      transform: translateX(-22px);
+      animation: slideIn .75s ease forwards;
+    }
+    .slide-in.delay{ animation-delay: .15s; }
+    @keyframes slideIn{
+      to{ opacity:1; transform: translateX(0); }
+    }
+
+    /* Moving gradient highlight for “AI” */
+    .shine{
+      background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(0,242,254,0.9), rgba(79,172,254,0.9), rgba(255,255,255,0.9));
+      background-size: 220% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 3.8s ease-in-out infinite;
+    }
+    @keyframes shine{
+      0%{ background-position: 0% 50%; }
+      50%{ background-position: 100% 50%; }
+      100%{ background-position: 0% 50%; }
+    }
+
+    /* Buttons */
+    .row{ display:flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .btn{
+      appearance:none;
+      border: none;
+      cursor:pointer;
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      color:#071018;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 18px 45px rgba(0,242,254,0.18);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      position: relative;
+      overflow:hidden;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+    }
+    /* shimmer sweep */
+    .btn::before{
+      content:"";
+      position:absolute;
+      top:0; left:-120%;
+      width:120%;
+      height:100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+      transform: skewX(-20deg);
+      transition: left .6s ease;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      box-shadow: 0 26px 60px rgba(79,172,254,0.22);
+    }
+    .btn:hover::before{ left: 130%; }
+    .btn:active{ transform: translateY(0); }
+
+    .btn-ghost{
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: none;
+    }
+    .btn-ghost::before{ display:none; }
+    .btn-ghost:hover{ background: rgba(255,255,255,0.12); }
+
+    /* Feature cards */
+    .feature-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    @media (min-width: 900px){
+      .feature-grid{ grid-template-columns: repeat(2, 1fr); }
+    }
+    .feature{
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      transition: transform .2s ease, background .2s ease;
+    }
+    .feature:hover{ transform: translateY(-4px); background: rgba(255,255,255,0.09); }
+    .feature .icon{ font-size: 22px; }
+    .feature .t{ font-weight: 700; margin-top: 6px; }
+    .feature .d{ font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* AI helper box */
+    .ai-box{
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+    }
+    label{ font-size: 13px; color: rgba(255,255,255,0.82); }
+    select{
+      width:100%;
+      margin-top: 8px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(10,16,26,0.35);
+      color: var(--text);
+      outline:none;
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+    select:focus{
+      border-color: rgba(79,172,254,0.6);
+      box-shadow: 0 0 0 4px rgba(79,172,254,0.18);
+    }
+
+    .best{
+      margin-top: 14px;
+      display:none;
+      animation: pop .25s ease both;
+    }
+    @keyframes pop{
+      from{ transform: scale(0.98); opacity: 0.75; }
+      to{ transform: scale(1); opacity: 1; }
+    }
+
+    .hr{ height:1px; background: rgba(255,255,255,0.12); margin: 16px 0; }
+    ul{ margin: 8px 0 0; padding-left: 18px; color: rgba(255,255,255,0.82); }
+    li{ margin: 6px 0; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+
+    <div class="nav">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>
+          SmartPath <span class="shine">AI</span>
+          <div style="font-weight:400" class="pill">Academic & Career Assistant</div>
+        </div>
+      </div>
+      <a class="pill" href="dashboard.html">Go to Dashboard →</a>
+    </div>
+
+    <div class="grid">
+      <!-- HERO -->
+      <div class="card span7">
+        <div class="hero">
+          <div>
+            <h1>
+              <span class="slide-in">Welcome to</span><br>
+              <span class="slide-in delay">SmartPath <span class="shine">AI</span></span>
+            </h1>
+            <p>
+              Get personalized study guidance and career direction using smart suggestions.
+              Start fast — and later you can upgrade to real AI.
+            </p>
+
+            <div class="row">
+              <a class="btn" href="dashboard.html">🚀 Start Now</a>
+              <button class="btn btn-ghost" id="scrollToAI">✨ Get AI Suggestion</button>
+            </div>
+
+            <div class="feature-grid">
+              <div class="feature">
+                <div class="icon">📚</div>
+                <div class="t">Study Planner</div>
+                <div class="d">Marks → priority + daily plan</div>
+              </div>
+              <div class="feature">
+                <div class="icon">🧭</div>
+                <div class="t">Career Guidance</div>
+                <div class="d">Interest + skills → best career paths</div>
+              </div>
+              <div class="feature">
+                <div class="icon">🧠</div>
+                <div class="t">Smart Tips</div>
+                <div class="d">Short, practical suggestions to improve faster</div>
+              </div>
+              <div class="feature">
+                <div class="icon">⚡</div>
+                <div class="t">Smooth Experience</div>
+                <div class="d">Modern UI + animations for a real app feel</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-box" id="aiHelper">
+            <h3 style="margin:0 0 8px;">AI Helper (Best Option)</h3>
+            <p style="margin:0 0 12px;">
+              Answer 2 quick questions and I’ll tell you the best next step.
+            </p>
+
+            <div>
+              <label>What do you need right now?</label>
+              <select id="goal">
+                <option value="" selected disabled>Select one</option>
+                <option value="marks">I want to improve my marks</option>
+                <option value="career">I’m confused about my career</option>
+                <option value="both">Both study + career</option>
+              </select>
+            </div>
+
+            <div style="margin-top:12px;">
+              <label>Your current confidence level?</label>
+              <select id="confidence">
+                <option value="" selected disabled>Select one</option>
+                <option value="low">Low (I’m struggling)</option>
+                <option value="mid">Medium (okay but not best)</option>
+                <option value="high">High (just need direction)</option>
+              </select>
+            </div>
+
+            <div class="row" style="margin-top:12px;">
+              <button class="btn" id="getBest">Find Best Option</button>
+            </div>
+
+            <div class="best" id="bestBox">
+              <div class="hr"></div>
+              <div class="pill" id="bestTag">✅ Best Option</div>
+              <h3 id="bestTitle" style="margin-top:10px;">AI Study Planner</h3>
+              <p id="bestText">Based on your answers, start with the Study Planner to fix weak areas quickly.</p>
+              <ul id="bestList"></ul>
+              <div class="row" style="margin-top:12px;">
+                <a class="btn" id="bestLink" href="dashboard.html">Go to Dashboard →</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRA CARD -->
+      <div class="card span5">
+        <h3 style="margin:0 0 8px;">How SmartPath AI helps you</h3>
+        <p>
+          It uses smart decision logic to recommend what you should do next.
+          You can later connect real AI to generate fully personalized plans.
+        </p>
+        <div class="hr"></div>
+        <h3 style="margin:0 0 8px;">Pro Tip</h3>
+        <p style="margin:0;">
+          Your fastest improvement comes from: weak topic → practice → mistake review.
+        </p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const scrollBtn = document.getElementById("scrollToAI");
+  const aiHelper = document.getElementById("aiHelper");
+  scrollBtn.addEventListener("click", () => {
+    aiHelper.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  const goal = document.getElementById("goal");
+  const confidence = document.getElementById("confidence");
+  const bestBox = document.getElementById("bestBox");
+  const bestTitle = document.getElementById("bestTitle");
+  const bestText = document.getElementById("bestText");
+  const bestList = document.getElementById("bestList");
+  const bestLink = document.getElementById("bestLink");
+
+  function renderBest({title, text, items, link}){
+    bestTitle.textContent = title;
+    bestText.textContent = text;
+    bestList.innerHTML = items.map(x => `<li>${x}</li>`).join("");
+    bestLink.href = link;
+    bestLink.textContent = link.includes("study_planner") ? "Open Study Planner →"
+                      : link.includes("career_ai") ? "Open Career Guidance →"
+                      : "Go to Dashboard →";
+    bestBox.style.display = "block";
+    bestBox.classList.remove("best");
+    void bestBox.offsetWidth;
+    bestBox.classList.add("best");
+  }
+
+  document.getElementById("getBest").addEventListener("click", (e) => {
+    e.preventDefault();
+    const g = goal.value;
+    const c = confidence.value;
+
+    if (!g || !c) {
+      renderBest({
+        title: "Select your answers first 🙂",
+        text: "Choose your goal + confidence level, then click again.",
+        items: ["This helps SmartPath AI pick the best option for you."],
+        link: "dashboard.html"
+      });
+      return;
+    }
+
+    // Best-option logic
+    if (g === "marks" || (g === "both" && c !== "high")) {
+      renderBest({
+        title: "Best Option: AI Study Planner",
+        text: "Start with the Study Planner to improve marks faster by focusing on weak areas.",
+        items: [
+          "Enter subject + marks",
+          "Follow daily time recommendation",
+          "Practice questions + review mistakes weekly"
+        ],
+        link: "study_planner.html"
+      });
+      return;
+    }
+
+    if (g === "career" || (g === "both" && c === "high")) {
+      renderBest({
+        title: "Best Option: AI Career Guidance",
+        text: "You’re ready for direction — use Career Guidance to get top career matches and a roadmap.",
+        items: [
+          "Enter interest, strong subject, and skills",
+          "Get ranked career paths",
+          "Follow the roadmap + skills to learn next"
+        ],
+        link: "career_ai.html"
+      });
+      return;
+    }
+
+    renderBest({
+      title: "Best Option: Dashboard",
+      text: "Explore both tools and decide which helps you most today.",
+      items: ["Try Study Planner first, then Career Guidance."],
+      link: "dashboard.html"
+    });
+  });
+</script>
+</body>
+</html>

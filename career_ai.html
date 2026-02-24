@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartPath AI - Career Guidance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#07101c;
+      --bg2:#0b2030;
+      --bg3:#143a4f;
+      --card: rgba(255,255,255,0.07);
+      --stroke: rgba(255,255,255,0.14);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --a1:#00f2fe;
+      --a2:#4facfe;
+      --shadow: 0 18px 55px rgba(0,0,0,0.38);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box; }
+    html{ height:100%; }
+    body{
+      min-height:100%;
+      margin:0;
+      font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 680px at 20% 10%, rgba(0,242,254,0.18), transparent 55%),
+        radial-gradient(900px 620px at 85% 28%, rgba(79,172,254,0.16), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x:hidden;
+      overflow-y:auto;
+      padding: clamp(12px, 2.2vw, 24px);
+    }
+    .container{
+      width:100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding-bottom: 24px;
+    }
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .brand-badge{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 16px 40px rgba(79,172,254,0.22);
+    }
+    .small{ font-size: 12px; color: var(--muted); font-weight: 500; }
+    .row{ display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.88);
+      font-size: 12px;
+      text-decoration:none;
+      transition: transform .18s ease, background .18s ease;
+      white-space: nowrap;
+    }
+    .pill:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.09); }
+
+    .grid{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+    .card{
+      grid-column: span 12;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .span6{ grid-column: span 12; }
+    @media (min-width: 900px){
+      .span6{ grid-column: span 6; }
+    }
+
+    h2{ margin:0 0 10px; font-size: 20px; }
+    p{ margin:0 0 12px; color: var(--muted); line-height: 1.6; }
+
+    .field{ margin: 12px 0; }
+    label{ display:block; font-size: 13px; color: rgba(255,255,255,0.82); margin-bottom: 6px; }
+    input{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(10,16,26,0.35);
+      color: var(--text);
+      outline:none;
+    }
+    input:focus{
+      border-color: rgba(79,172,254,0.6);
+      box-shadow: 0 0 0 4px rgba(79,172,254,0.18);
+    }
+    .btn{
+      width:100%;
+      cursor:pointer;
+      border: none;
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      color:#071018;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 18px 45px rgba(0,242,254,0.18);
+      transition: transform .18s ease, filter .18s ease;
+    }
+    .btn:hover{ transform: translateY(-2px); filter: brightness(1.05); }
+    .hr{ height:1px; background: rgba(255,255,255,0.12); margin: 14px 0; }
+
+    .result{ display:none; }
+    .list{ margin: 8px 0 0 18px; color: rgba(255,255,255,0.82); }
+    .list li{ margin: 6px 0; }
+
+    .result .card{
+      box-shadow:none;
+      background: rgba(255,255,255,0.05);
+      margin: 14px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>
+          <div>SmartPath AI</div>
+          <div class="small">Career Guidance (School Students)</div>
+        </div>
+      </div>
+      <div class="row">
+        <a class="pill" href="dashboard.html">← Dashboard</a>
+        <a class="pill" href="index.html">Home</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card span6">
+        <h2>AI Course & Career Suggestions</h2>
+        <p>Enter your interest, strong subject, and skills. You’ll get top suggestions like <b>Management</b>, <b>Accountancy</b>, <b>Hotel Management</b>, <b>IT</b>, etc + course roadmap + careers inside each course.</p>
+
+        <form id="careerForm">
+          <div class="field">
+            <label>Interest</label>
+            <input type="text" name="interest" placeholder="IT, Science, Management, Hotel, Design, Law..." required>
+          </div>
+
+          <div class="field">
+            <label>Strong Subject</label>
+            <input type="text" name="strength" placeholder="Math, Biology, Accounts, English, Social..." required>
+          </div>
+
+          <div class="field">
+            <label>Skills (comma-separated)</label>
+            <input type="text" name="skill" placeholder="communication, leadership, cooking, coding, teamwork..." required>
+          </div>
+
+          <div class="field">
+            <button class="btn" type="submit">Generate Suggestions</button>
+          </div>
+
+          <div class="small">Tip: write multiple skills separated by commas.</div>
+        </form>
+      </div>
+
+      <div class="card span6">
+        <h2>How it works</h2>
+        <p>This is a rule-based recommendation engine for school students. It suggests different <b>courses</b> and gives a <b>different course roadmap</b> based on your subject + interest + skills. Then it also shows <b>career roadmaps inside the selected course</b> (IT → IT careers, Management → Management careers, Hotel → Hotel careers, etc.).</p>
+        <div class="hr"></div>
+        <div class="row" style="gap:12px;">
+          <div>
+            <div class="pill">✅ Course Suggestions</div>
+            <p class="small">Management, Accounts, Hotel Mgmt, IT, etc.</p>
+          </div>
+          <div>
+            <div class="pill">🧭 Course Roadmap</div>
+            <p class="small">Different steps for each course.</p>
+          </div>
+          <div>
+            <div class="pill">🚀 Career Roadmaps</div>
+            <p class="small">Careers inside each course.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="careerResult" class="card result"></div>
+    </div>
+  </div>
+
+<script>
+  // ===== Helpers =====
+  const normalize = (s) => (s || "").trim().toLowerCase();
+  const splitSkills = (s) => normalize(s).split(",").map(x => x.trim()).filter(Boolean);
+  const hasAny = (arr, keywords) => keywords.some(k => arr.includes(k));
+  const containsAny = (text, keywords) => keywords.some(k => text.includes(k));
+
+  // ===== Subject Grouping =====
+  function subjectGroup(strength){
+    const s = normalize(strength);
+    if (containsAny(s, ["math","statistics","physics","computer","computing","programming","science"])) return "STEM";
+    if (containsAny(s, ["biology","chemistry","health","zoology","botany"])) return "BIO";
+    if (containsAny(s, ["accounts","accounting","economics","business","commerce","finance","management"])) return "BUS";
+    if (containsAny(s, ["english","nepali","literature","journalism","sociology","psychology","social"])) return "HUM";
+    if (containsAny(s, ["art","design","graphics","multimedia","drawing"])) return "DESIGN";
+    if (containsAny(s, ["hotel","hospitality","tourism"])) return "HOSP";
+    return "GENERAL";
+  }
+
+  // ===== Course Roadmaps =====
+  function roadmapForCourse(courseKey, group){
+    const map = {
+      management: {
+        BUS: [
+          "Choose: +2 Management / Commerce stream (if available).",
+          "Improve English + Presentation (daily speaking/writing).",
+          "Learn basics: Marketing, Finance, Entrepreneurship (notes/videos).",
+          "Do a mini project: small business plan or school event planning."
+        ],
+        HUM: [
+          "Strengthen communication: debates, anchoring, writing.",
+          "Learn basics of business: sales, marketing, leadership.",
+          "Join clubs (student council, social club) for leadership practice.",
+          "Make a portfolio: certificates + achievements + projects."
+        ],
+        GENERAL: [
+          "Build communication + leadership skills.",
+          "Learn basics of business/entrepreneurship.",
+          "Take part in school events (organizing team).",
+          "Start simple: presentations + teamwork projects."
+        ]
+      },
+
+      accounts: {
+        BUS: [
+          "Choose: +2 Commerce / Accounting track (if available).",
+          "Master basics: journal, ledger, trial balance (practice daily).",
+          "Learn Excel (tables, formulas, charts).",
+          "Do a project: monthly expense tracker / simple business accounts."
+        ],
+        STEM: [
+          "If you like math, accounting is a strong option.",
+          "Start accounting basics + Excel together.",
+          "Practice calculation speed + accuracy.",
+          "Try basic finance topics: budgeting, saving, interest."
+        ],
+        GENERAL: [
+          "Learn accounting basics + practice small problems daily.",
+          "Start Excel for record keeping.",
+          "Do a personal budget project.",
+          "Build habit: revision + weekly test."
+        ]
+      },
+
+      hotel: {
+        HOSP: [
+          "Choose: Hotel Management / Hospitality course after school.",
+          "Improve English + interpersonal skills (greetings, customer handling).",
+          "Learn basics: Food & Beverage, Front Office, Housekeeping.",
+          "Do practice: event volunteering + hospitality etiquette."
+        ],
+        HUM: [
+          "Hospitality suits strong communication & service mindset.",
+          "Improve English + confidence (speaking daily).",
+          "Learn basics of tourism + customer service.",
+          "Volunteer in events to practice teamwork & hosting."
+        ],
+        GENERAL: [
+          "Work on communication + discipline + teamwork.",
+          "Learn hospitality basics (food safety, service).",
+          "Practice personality grooming & etiquette.",
+          "Try internships/volunteering in events (if available)."
+        ]
+      },
+
+      it: {
+        STEM: [
+          "Choose: Computer/IT track (if available).",
+          "Start with HTML/CSS/JS or Python basics.",
+          "Build 2 mini projects (portfolio + simple app).",
+          "Learn Git/GitHub + join coding communities."
+        ],
+        HUM: [
+          "Start with Web basics + UI design + content writing.",
+          "Build a portfolio site + one website project.",
+          "Focus on communication + documentation skills.",
+          "Collaborate with a developer friend on a project."
+        ],
+        GENERAL: [
+          "Start with basic programming logic (Scratch/Python/JS).",
+          "Practice 30 mins/day.",
+          "Build small projects and show them to teachers/friends.",
+          "Learn basic computer fundamentals + internet safety."
+        ]
+      },
+
+      science: {
+        STEM: [
+          "Choose: +2 Science (Physics/Chemistry/Math/Computer).",
+          "Make strong routine: concepts + numericals daily.",
+          "Do lab practice + write notes regularly.",
+          "Target entrance prep early (if your goal requires it)."
+        ],
+        BIO: [
+          "Choose: +2 Science (Biology + Chemistry).",
+          "Strengthen diagrams + concepts + MCQs.",
+          "Do small research reading and summaries.",
+          "Explore health fields: lab tech, nursing, public health, medicine."
+        ],
+        GENERAL: [
+          "Decide between Math-science or Bio-science.",
+          "Build daily study routine and practice questions.",
+          "Use past papers + weekly mock tests.",
+          "Find your favorite topic and go deeper."
+        ]
+      },
+
+      law: {
+        HUM: [
+          "Improve English, reading, and critical thinking.",
+          "Join debate/public speaking clubs.",
+          "Read basic civics/constitution topics.",
+          "Try mock debates + case story summaries."
+        ],
+        GENERAL: [
+          "Improve communication + reading habit.",
+          "Study social studies/civics strongly.",
+          "Practice logical reasoning questions.",
+          "Join debate/anchoring for confidence."
+        ]
+      },
+
+      design: {
+        DESIGN: [
+          "Learn Canva/Figma basics + design principles.",
+          "Redesign posters/app screens as practice.",
+          "Build a portfolio (Behance/Notion/Instagram).",
+          "Learn storytelling + creativity daily."
+        ],
+        HUM: [
+          "Design + communication is powerful combo.",
+          "Learn Canva/Figma + poster design.",
+          "Build portfolio with school projects.",
+          "Try content + design together (social media posts)."
+        ],
+        GENERAL: [
+          "Start with Canva then move to Figma.",
+          "Practice 30 mins/day (posters, banners).",
+          "Create portfolio + get feedback from friends/teachers.",
+          "Learn basics of color, typography, layout."
+        ]
+      }
+    };
+
+    const courseMap = map[courseKey] || {};
+    return courseMap[group] || courseMap.GENERAL || [
+      "Pick the course and check requirements in your area.",
+      "Build basics and practice consistently.",
+      "Create small projects/portfolio related to the course."
+    ];
+  }
+
+  // ===== Careers inside each course (Career Roadmaps) =====
+  function careersForCourse(courseKey, group){
+    const db = {
+      it: [
+        { name: "Software Developer", steps: [
+          "Learn HTML + CSS + JavaScript (web basics).",
+          "Pick one language: Java or Python (start basics).",
+          "Build 2 projects: portfolio website + mini app.",
+          "Learn Git/GitHub and upload your projects.",
+          "Apply for internship / freelancing (later)."
+        ]},
+        { name: "Data Analyst", steps: [
+          "Learn Excel (tables, charts, pivot).",
+          "Learn SQL basics (SELECT, JOIN, GROUP BY).",
+          "Learn Power BI / Tableau basics.",
+          "Make 1 dashboard project + a written report.",
+          "Create a portfolio (GitHub/Notion) and improve monthly."
+        ]},
+        { name: "Cyber Security", steps: [
+          "Learn networking basics + online safety.",
+          "Learn Linux basics (commands, files, permissions).",
+          "Learn cyber basics (phishing, malware, passwords).",
+          "Practice beginner CTF challenges (later).",
+          "Follow an ethical hacking roadmap step-by-step."
+        ]}
+      ],
+
+      management: [
+        { name: "Marketing Manager", steps: [
+          "Improve communication + confidence (daily speaking).",
+          "Learn marketing basics (4Ps, branding).",
+          "Learn digital marketing (social media, ads, content).",
+          "Do a mini project: promote a school event or small product.",
+          "Build a simple marketing portfolio (posters + plan + results)."
+        ]},
+        { name: "HR Manager", steps: [
+          "Build leadership + teamwork skills.",
+          "Practice communication + conflict handling.",
+          "Understand basic HR tasks (recruitment, training).",
+          "Join clubs / organize events to gain real experience.",
+          "Practice interview speaking + personality development."
+        ]},
+        { name: "Entrepreneur", steps: [
+          "Find a small problem to solve in your community.",
+          "Write a basic business plan (cost, profit, idea).",
+          "Learn budgeting + saving habits.",
+          "Start a small project (service / reselling / event work).",
+          "Improve negotiation + presentation skills."
+        ]}
+      ],
+
+      hotel: [
+        { name: "Hotel Manager", steps: [
+          "Improve English + polite speaking.",
+          "Learn basics: Front Office + Customer Handling.",
+          "Practice grooming + etiquette.",
+          "Volunteer in events as a host.",
+          "Try hotel exposure/internship later."
+        ]},
+        { name: "Chef / Culinary Expert", steps: [
+          "Learn cooking basics + kitchen safety.",
+          "Practice 2 recipes weekly + improve presentation.",
+          "Learn food hygiene + storage.",
+          "Join culinary training after school.",
+          "Work in restaurant training later."
+        ]},
+        { name: "Tourism / Travel Guide", steps: [
+          "Improve communication + storytelling.",
+          "Learn tourism basics + local culture knowledge.",
+          "Practice guiding friends/family tours (mock).",
+          "Learn one extra language (optional).",
+          "Join tourism/hospitality course later."
+        ]}
+      ],
+
+      accounts: [
+        { name: "Accountant", steps: [
+          "Learn journal, ledger, trial balance basics.",
+          "Practice accounting problems daily.",
+          "Learn Excel (tables, formulas).",
+          "Do a project: monthly budget/expense tracker.",
+          "Choose commerce/management track later."
+        ]},
+        { name: "Banking Officer", steps: [
+          "Improve math speed + accuracy.",
+          "Learn basics of finance and savings.",
+          "Practice reasoning questions weekly.",
+          "Improve English + communication.",
+          "Prepare for banking entry exams later."
+        ]}
+      ],
+
+      science: group === "BIO"
+        ? [
+          { name: "Doctor / Medical Field", steps: [
+            "Strengthen Biology + Chemistry daily.",
+            "Practice MCQs + diagrams weekly.",
+            "Build strong reading habit (science topics).",
+            "Prepare for entrance exams later.",
+            "Volunteer in health camps if possible."
+          ]},
+          { name: "Lab Technician / Research Assistant", steps: [
+            "Focus on Biology + lab observation.",
+            "Learn basic lab safety and instruments.",
+            "Write notes + summaries of topics.",
+            "Join science fairs + projects.",
+            "Volunteer/intern in labs later."
+          ]}
+        ]
+        : [
+          { name: "Engineer", steps: [
+            "Strengthen Physics + Math numericals.",
+            "Practice daily problem solving.",
+            "Join science clubs or robotics events.",
+            "Prepare for entrance exams later.",
+            "Build small projects (models, robotics)."
+          ]},
+          { name: "Computer Engineer", steps: [
+            "Make Math + Physics strong.",
+            "Start basic programming (C/Python).",
+            "Build small logic projects.",
+            "Create a basic portfolio of projects.",
+            "Prepare for entrance exams later."
+          ]}
+        ],
+
+      law: [
+        { name: "Lawyer / Advocate", steps: [
+          "Improve reading + writing skills daily.",
+          "Join debate and public speaking.",
+          "Learn civics + constitution basics.",
+          "Practice critical thinking questions.",
+          "Prepare for law entrance later."
+        ]},
+        { name: "Public Service Officer", steps: [
+          "Build general knowledge + current affairs habit.",
+          "Strong communication and confidence.",
+          "Practice reasoning + writing weekly.",
+          "Join leadership activities.",
+          "Prepare for exams later."
+        ]}
+      ],
+
+      design: [
+        { name: "Graphic Designer", steps: [
+          "Learn Canva basics first.",
+          "Practice posters/banners weekly.",
+          "Learn color + typography principles.",
+          "Build portfolio (Instagram/Behance).",
+          "Learn Photoshop/Figma later."
+        ]},
+        { name: "UI/UX Designer", steps: [
+          "Learn Figma basics.",
+          "Redesign 2 apps with case studies.",
+          "Practice layout + usability rules.",
+          "Build a portfolio website.",
+          "Collaborate with a developer later."
+        ]}
+      ]
+    };
+
+    return db[courseKey] || [];
+  }
+
+  // ===== Recommendation Engine =====
+  function recommendCourses({interest, strength, skills}){
+    const I = normalize(interest);
+    const S = normalize(strength);
+    const K = skills.map(normalize);
+    const group = subjectGroup(strength);
+
+    const courses = [
+      {
+        key: "management",
+        title: "Management (Business/Entrepreneurship)",
+        tags: ["management","business","leadership"],
+        base: 35,
+        rules: [
+          { when: () => containsAny(I, ["management","business","entrepreneur","marketing"]), add: 40, why: "Direct match with management interest." },
+          { when: () => containsAny(S, ["accounts","economics","management","english","social"]), add: 20, why: "Your subject supports business/communication." },
+          { when: () => hasAny(K, ["leadership","communication","presentation","teamwork"]), add: 25, why: "Strong skills for management." }
+        ],
+        roles: ["Business Student", "Management Trainee (Later)", "Entrepreneur (Later)"]
+      },
+      {
+        key: "accounts",
+        title: "Accountancy / Commerce (Accounting)",
+        tags: ["accounts","commerce","finance"],
+        base: 35,
+        rules: [
+          { when: () => containsAny(I, ["accounts","accounting","commerce","finance","bank"]), add: 40, why: "Direct match with accounts/finance interest." },
+          { when: () => containsAny(S, ["accounts","math","economics"]), add: 25, why: "Strong subject supports accounting." },
+          { when: () => hasAny(K, ["calculation","excel","detail oriented","attention"]), add: 20, why: "Helpful skills for accounting." }
+        ],
+        roles: ["Accounting Student", "Banking Path (Later)", "Finance Track (Later)"]
+      },
+      {
+        key: "hotel",
+        title: "Hotel Management / Hospitality",
+        tags: ["hotel","hospitality","tourism"],
+        base: 30,
+        rules: [
+          { when: () => containsAny(I, ["hotel","hospitality","tourism","travel"]), add: 45, why: "Direct match with hospitality interest." },
+          { when: () => containsAny(S, ["english","nepali","social"]), add: 15, why: "Languages/social skills support hospitality." },
+          { when: () => hasAny(K, ["communication","customer service","teamwork","cooking","hosting"]), add: 25, why: "Great hospitality skills." }
+        ],
+        roles: ["Hotel Student", "Chef Track (Later)", "Tourism Track (Later)"]
+      },
+      {
+        key: "science",
+        title: "Science (Math/Computer OR Biology)",
+        tags: ["science","stem","research"],
+        base: 30,
+        rules: [
+          { when: () => containsAny(I, ["science","engineering","doctor","medical","research"]), add: 35, why: "Direct match with science interest." },
+          { when: () => containsAny(S, ["math","physics","chemistry","biology","science"]), add: 25, why: "Strong subject supports science stream." },
+          { when: () => hasAny(K, ["problem solving","logic","lab","research"]), add: 15, why: "Useful science skills." }
+        ],
+        roles: ["Science Student", "Engineering/Medical Track (Later)", "Research Path (Later)"]
+      },
+      {
+        key: "it",
+        title: "IT / Computer Science",
+        tags: ["it","computer","coding"],
+        base: 30,
+        rules: [
+          { when: () => containsAny(I, ["it","computer","software","coding","tech"]), add: 40, why: "Direct match with IT interest." },
+          { when: () => containsAny(S, ["math","computer","physics"]), add: 20, why: "Strong subjects for IT." },
+          { when: () => hasAny(K, ["coding","programming","java","c","python","javascript"]), add: 25, why: "You already have coding skills." }
+        ],
+        roles: ["IT Student", "Developer Track (Later)", "Cyber/Data Track (Later)"]
+      },
+      {
+        key: "law",
+        title: "Law / Legal Studies (Starter Direction)",
+        tags: ["law","legal","civics"],
+        base: 20,
+        rules: [
+          { when: () => containsAny(I, ["law","legal","advocate","politics"]), add: 45, why: "Direct match with law interest." },
+          { when: () => containsAny(S, ["english","social","nepali","civics"]), add: 20, why: "Strong subject supports reading/writing." },
+          { when: () => hasAny(K, ["debate","speaking","writing","critical thinking"]), add: 20, why: "Great skills for law." }
+        ],
+        roles: ["Law Student (Later)", "Public Service (Later)", "Legal Path (Later)"]
+      },
+      {
+        key: "design",
+        title: "Design (Graphics/UI/Creative)",
+        tags: ["design","creative","ui"],
+        base: 25,
+        rules: [
+          { when: () => containsAny(I, ["design","art","creative","graphics","ui","ux"]), add: 45, why: "Direct match with design interest." },
+          { when: () => containsAny(S, ["art","english","social"]), add: 15, why: "Strong subjects support creativity + communication." },
+          { when: () => hasAny(K, ["creativity","canva","figma","drawing","content"]), add: 25, why: "Great design-related skills." }
+        ],
+        roles: ["Design Student", "Graphic/UI Track (Later)", "Creative Field (Later)"]
+      }
+    ];
+
+    const scored = courses.map(c => {
+      let score = c.base;
+      const reasons = [];
+
+      for (const r of c.rules){
+        if (r.when()){
+          score += r.add;
+          reasons.push(`+${r.add}: ${r.why}`);
+        }
+      }
+
+      const roadmap = roadmapForCourse(c.key, group);
+
+      // Skill gap suggestions
+      const nextSkills = [];
+      if (c.key === "management") {
+        if (!hasAny(K, ["communication","presentation"])) nextSkills.push("Presentation");
+        if (!hasAny(K, ["leadership"])) nextSkills.push("Leadership");
+        if (!hasAny(K, ["confidence"])) nextSkills.push("Confidence Building");
+      }
+      if (c.key === "accounts") {
+        if (!hasAny(K, ["excel"])) nextSkills.push("Excel");
+        if (!hasAny(K, ["calculation"])) nextSkills.push("Calculation Practice");
+        if (!hasAny(K, ["detail oriented","attention"])) nextSkills.push("Attention to Detail");
+      }
+      if (c.key === "hotel") {
+        if (!hasAny(K, ["communication"])) nextSkills.push("Communication");
+        if (!hasAny(K, ["customer service"])) nextSkills.push("Customer Service");
+        if (!hasAny(K, ["teamwork"])) nextSkills.push("Teamwork");
+      }
+      if (c.key === "it") {
+        if (!hasAny(K, ["coding","programming"])) nextSkills.push("Basic Coding");
+        if (!hasAny(K, ["problem solving"])) nextSkills.push("Problem Solving");
+        if (!hasAny(K, ["git"])) nextSkills.push("Git/GitHub");
+      }
+      if (c.key === "science") {
+        if (!hasAny(K, ["problem solving"])) nextSkills.push("Problem Solving");
+        if (!hasAny(K, ["lab"])) nextSkills.push("Lab Practice/Observation");
+        if (!hasAny(K, ["time management"])) nextSkills.push("Time Management");
+      }
+      if (c.key === "design") {
+        if (!hasAny(K, ["canva","figma"])) nextSkills.push("Canva/Figma");
+        if (!hasAny(K, ["portfolio"])) nextSkills.push("Portfolio Building");
+      }
+      if (c.key === "law") {
+        if (!hasAny(K, ["debate"])) nextSkills.push("Debate");
+        if (!hasAny(K, ["writing"])) nextSkills.push("Writing Skills");
+        if (!hasAny(K, ["critical thinking"])) nextSkills.push("Critical Thinking");
+      }
+
+      return { ...c, score, reasons, roadmap, nextSkills };
+    }).sort((a,b) => b.score - a.score);
+
+    return scored.slice(0, 3);
+  }
+
+  // ===== UI Render =====
+  function renderResult(top3, raw) {
+    const pills = (arr) => arr.map(x => `<span class="pill">${x}</span>`).join(" ");
+    const group = subjectGroup(raw.strength);
+
+    return `
+      <h2>Top Course Suggestions for You</h2>
+      <p class="small" style="margin-top:8px;">
+        Based on:
+        <span class="pill">Interest: ${raw.interest}</span>
+        <span class="pill">Strong Subject: ${raw.strength}</span>
+        <span class="pill">Skills: ${raw.skill}</span>
+      </p>
+      <div class="hr"></div>
+
+      ${top3.map((x, idx) => {
+        const careerList = careersForCourse(x.key, group);
+
+        return `
+          <div class="card">
+            <h3 style="margin:0 0 6px;">${idx+1}) ${x.title} <span class="pill">Score: ${x.score}</span></h3>
+            <div class="small">Future roles (general): ${x.roles.join(", ")}</div>
+
+            <div class="hr"></div>
+            <div class="row" style="margin-bottom:10px;">${pills(x.tags)}</div>
+
+            <p><strong>Why this course fits you:</strong></p>
+            <ul class="list">
+              ${x.reasons.length ? x.reasons.map(r => `<li>${r}</li>`).join("") : `<li>General match based on your inputs.</li>`}
+            </ul>
+
+            <p style="margin-top:12px;"><strong>Course Roadmap (for school students):</strong></p>
+            <ul class="list">
+              ${x.roadmap.map(s => `<li>${s}</li>`).join("")}
+            </ul>
+
+            ${careerList.length ? `
+              <div class="hr"></div>
+              <p><strong>Career roadmaps inside this course:</strong></p>
+
+              ${careerList.map(c => `
+                <div class="card" style="background: rgba(255,255,255,0.04); box-shadow:none; margin: 12px 0;">
+                  <h4 style="margin:0 0 6px;">✅ ${c.name}</h4>
+                  <ul class="list">
+                    ${c.steps.map(s => `<li>${s}</li>`).join("")}
+                  </ul>
+                </div>
+              `).join("")}
+            ` : ""}
+
+            ${x.nextSkills.length ? `
+              <div class="hr"></div>
+              <p><strong>Skills to learn next:</strong></p>
+              <div class="row" style="gap:8px;">${pills(x.nextSkills)}</div>
+            ` : ``}
+          </div>
+        `;
+      }).join("")}
+
+      <div class="hr"></div>
+      <p class="small">Tip: You can type interest like "IT", "Management", "Hotel", "Accounts" etc for best results.</p>
+    `;
+  }
+
+  // ===== Form Handler =====
+  document.getElementById("careerForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    const interest = this.interest.value;
+    const strength = this.strength.value;
+    const skill = this.skill.value;
+
+    const skills = splitSkills(skill);
+    const top3 = recommendCourses({interest, strength, skills});
+
+    const resultDiv = document.getElementById("careerResult");
+    resultDiv.style.display = "block";
+    resultDiv.innerHTML = renderResult(top3, {interest, strength, skill});
+    resultDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartPath AI - Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#0b1320;
+      --bg2:#0f2a3a;
+      --bg3:#1c3f57;
+      --card: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.14);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --accent1:#00f2fe;
+      --accent2:#4facfe;
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --radius: 18px;
+    }
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 700px at 20% 10%, rgba(0,242,254,0.18), transparent 55%),
+        radial-gradient(900px 600px at 90% 30%, rgba(79,172,254,0.16), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x:hidden;
+      display:flex;
+      justify-content:center;
+      padding: 22px;
+    }
+    .container{ width: min(1100px, 100%); }
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .brand-badge{
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      box-shadow: 0 12px 30px rgba(79,172,254,0.22);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.88);
+      font-size: 12px;
+      text-decoration:none;
+      transition: transform .18s ease, background .18s ease;
+      white-space: nowrap;
+    }
+    .pill:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.09); }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 16px;
+    }
+    .layout{ display:grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 920px){ .layout{ grid-template-columns: 0.75fr 1.25fr; } }
+    .help p{ margin: 0 0 10px; color: var(--muted); line-height: 1.6; }
+    .help code{ color: rgba(255,255,255,0.92); }
+    .chatWrap{ display:flex; flex-direction:column; height: min(72vh, 640px); gap: 12px; }
+    .messages{
+      flex:1; overflow:auto; padding: 10px;
+      border-radius: 14px; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+    }
+    .msg{
+      max-width: 90%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      margin: 8px 0;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .msg.user{ margin-left:auto; background: rgba(79,172,254,0.18); border: 1px solid rgba(79,172,254,0.28); }
+    .msg.ai{ margin-right:auto; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); }
+    .meta{ font-size: 12px; color: rgba(255,255,255,0.66); margin: 0 0 8px; }
+    .composer{ display:flex; gap: 10px; align-items:flex-end; }
+    textarea{
+      flex:1; resize:none; min-height: 44px; max-height: 140px;
+      padding: 12px 12px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      outline:none; background: rgba(10,16,26,0.35);
+      color: var(--text);
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+      font-family: inherit; font-size: 14px;
+    }
+    textarea:focus{
+      border-color: rgba(79,172,254,0.6);
+      box-shadow: 0 0 0 4px rgba(79,172,254,0.18);
+      background: rgba(10,16,26,0.5);
+    }
+    .btn{
+      appearance:none; border: none;
+      padding: 12px 14px; border-radius: 14px;
+      font-weight: 700; cursor:pointer;
+      color: #071018;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      box-shadow: 0 16px 40px rgba(0,242,254,0.18);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      white-space: nowrap;
+    }
+    .btn:hover{ transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 22px 55px rgba(79,172,254,0.22); }
+    .btn:active{ transform: translateY(0); }
+    .btnGhost{
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: none;
+    }
+    .status{ font-size: 12px; color: rgba(255,255,255,0.72); min-height: 18px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>
+          SmartPath AI
+          <div style="font-weight:400" class="pill">Chat</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="pill" href="dashboard.html">← Dashboard</a>
+        <a class="pill" href="index.html">Home</a>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="card help">
+        <h3 style="margin:0 0 10px;">How this works</h3>
+        <p>
+          This page calls <code>POST /api/chat</code> on your own backend server.
+          Your backend then calls the OpenAI API securely (so your API key is not exposed in the browser).
+        </p>
+        <p class="meta" style="margin-top:12px;">
+          Tip: Try “Make me a 7‑day study plan for DSA” or “Recommend careers based on: interest=IT, strong subject=Math, skills=coding, communication”.
+        </p>
+        <button class="btn btnGhost" id="clearBtn" type="button">Clear chat</button>
+      </div>
+
+      <div class="card chatWrap">
+        <div class="meta">Chat like ChatGPT (simple demo). Messages are saved in this tab only.</div>
+        <div class="messages" id="messages"></div>
+
+        <div class="status" id="status"></div>
+
+        <div class="composer">
+          <textarea id="input" placeholder="Type your message... (Enter to send, Shift+Enter new line)"></textarea>
+          <button class="btn" id="sendBtn" type="button">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const messagesEl = document.getElementById("messages");
+  const inputEl = document.getElementById("input");
+  const sendBtn = document.getElementById("sendBtn");
+  const statusEl = document.getElementById("status");
+  const clearBtn = document.getElementById("clearBtn");
+
+  // Conversation in memory (kept for the request)
+  const history = [
+    { role: "system", content: "You are SmartPath AI, a helpful assistant for study planning and career guidance." }
+  ];
+
+  function addMsg(role, text){
+    const div = document.createElement("div");
+    div.className = "msg " + (role === "user" ? "user" : "ai");
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function setStatus(t){ statusEl.textContent = t || ""; }
+
+  async function send(){
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    inputEl.value = "";
+    addMsg("user", text);
+    history.push({ role: "user", content: text });
+
+    setStatus("Thinking...");
+    sendBtn.disabled = true;
+
+    try{
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history })
+      });
+
+      if (!res.ok){
+        const errText = await res.text();
+        throw new Error(errText || ("HTTP " + res.status));
+      }
+
+      const data = await res.json();
+      const reply = (data && data.reply) ? String(data.reply) : "No reply returned.";
+
+      addMsg("assistant", reply);
+      history.push({ role: "assistant", content: reply });
+      setStatus("");
+    }catch(err){
+      console.error(err);
+      setStatus("Error: " + (err && err.message ? err.message : String(err)));
+      addMsg("assistant", "Sorry — I couldn't reach the server. Make sure your backend is running and /api/chat works.");
+    }finally{
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+  }
+
+  sendBtn.addEventListener("click", send);
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      send();
+    }
+  });
+
+  clearBtn.addEventListener("click", () => {
+    messagesEl.innerHTML = "";
+    history.splice(1); // keep system
+    setStatus("");
+    inputEl.focus();
+  });
+
+  // Starter message
+  addMsg("assistant", "Hi! I’m SmartPath AI. Ask me anything about study or career.");
+</script>
+</body>
+</html>
+

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartPath AI - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0b1320;
+      --bg2:#0f2a3a;
+      --bg3:#1c3f57;
+
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(255,255,255,0.09);
+      --stroke: rgba(255,255,255,0.14);
+
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+
+      --accent1:#00f2fe;
+      --accent2:#4facfe;
+
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+
+    body{
+      margin:0;
+      font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 700px at 20% 10%, rgba(0,242,254,0.18), transparent 55%),
+        radial-gradient(900px 600px at 90% 30%, rgba(79,172,254,0.16), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x:hidden;
+    }
+
+    .container{
+      width: min(1100px, 92%);
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      animation: fadeUp .35s ease both;
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .brand-badge{
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      box-shadow: 0 12px 30px rgba(79,172,254,0.22);
+    }
+    .small{ font-size: 13px; color: var(--muted); }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.86);
+      font-size: 12px;
+      text-decoration:none;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .pill:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.09); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card{
+      grid-column: span 12;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+      animation: fadeUp .35s ease both;
+    }
+
+    h2{ margin:0 0 10px; font-size: clamp(20px, 2.2vw, 26px); }
+    h3{ margin:0 0 8px; }
+    p{ margin: 0 0 12px; color: var(--muted); line-height: 1.65; }
+    .hr{ height:1px; background: rgba(255,255,255,0.12); margin: 16px 0; }
+
+    .span6{ grid-column: span 12; }
+    @media (min-width: 820px){ .span6{ grid-column: span 6; } }
+
+    /* Dashboard buttons */
+    .dash-actions{
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .dash-btn{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:16px;
+      border-radius:16px;
+      text-decoration:none;
+      color: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      position: relative;
+      overflow:hidden;
+    }
+
+    /* Shine effect */
+    .dash-btn::before{
+      content:"";
+      position:absolute;
+      top:0; left:-120%;
+      width:120%;
+      height:100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transform: skewX(-20deg);
+      transition: left .6s ease;
+    }
+
+    .dash-btn:hover{
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.09);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+    }
+    .dash-btn:hover::before{ left:130%; }
+
+    .dash-icon{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      font-size:22px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .dash-title{ font-weight:600; font-size: 16px; }
+    .dash-sub{ font-size:13px; color: rgba(255,255,255,0.70); margin-top:2px; }
+
+    .dash-arrow{
+      margin-left:auto;
+      font-size:18px;
+      opacity:0.85;
+      transition: transform .2s ease;
+    }
+    .dash-btn:hover .dash-arrow{ transform: translateX(4px); }
+
+    /* Button */
+    .btn{
+      width:100%;
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-weight: 600;
+      cursor:pointer;
+      border: none;
+      color:#071018;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      box-shadow: 0 16px 40px rgba(0,242,254,0.18);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      box-shadow: 0 22px 55px rgba(79,172,254,0.22);
+    }
+    .btn:active{ transform: translateY(0); }
+
+    .btn-ghost{
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: none;
+    }
+    .btn-ghost:hover{ background: rgba(255,255,255,0.12); }
+
+    /* AI Tip animation */
+    .ai-tip.pop{ animation: pop .25s ease; }
+    @keyframes pop{ from{ transform: scale(0.98); opacity: 0.75; } to{ transform: scale(1); opacity: 1; } }
+
+    @keyframes fadeUp{ from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform: translateY(0);} }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- Top Nav -->
+    <div class="nav">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>
+          <div>SmartPath AI</div>
+          <div class="small">Dashboard</div>
+        </div>
+      </div>
+      <a class="pill" href="index.html">🏠 Home</a>
+    </div>
+
+    <div class="grid">
+      <!-- Left -->
+      <div class="card span6">
+        <h2>Choose Your Path</h2>
+        <p>Pick an option to continue. Your progress becomes smarter as you use it.</p>
+
+        <div class="dash-actions">
+          <a class="dash-btn" href="study_planner.html">
+            <div class="dash-icon">📚</div>
+            <div>
+              <div class="dash-title">AI Study Planner</div>
+              <div class="dash-sub">Analyze marks → get a daily plan</div>
+            </div>
+            <div class="dash-arrow">→</div>
+          </a>
+
+          <a class="dash-btn" href="career_ai.html">
+            <div class="dash-icon">🧭</div>
+            <div>
+              <div class="dash-title">AI Career Guidance</div>
+              <div class="dash-sub">Interest + skills → career roadmap</div>
+            </div>
+            <div class="dash-arrow">→</div>
+          </a>
+        </div>
+
+        <div class="hr"></div>
+
+        <button class="btn btn-ghost" id="shuffleTip">✨ New AI Tip</button>
+      </div>
+
+      <!-- Right -->
+      <div class="card span6">
+        <h2>AI Suggestions</h2>
+        <p class="small">Quick guidance to help you study smarter and choose better.</p>
+
+        <div class="ai-tip" id="aiTipBox">
+          <div class="pill">💡 Tip</div>
+          <h3 id="tipTitle" style="margin-top:10px;">Start with your weakest topic</h3>
+          <p id="tipText">Spend 20 minutes fixing weak concepts before solving questions. This improves marks faster.</p>
+        </div>
+
+        <div class="hr"></div>
+
+        <h3>Today’s Mini Plan</h3>
+        <ul id="miniPlan">
+          <li>30 min: revise one weak chapter</li>
+          <li>30 min: practice 10 questions</li>
+          <li>10 min: note mistakes</li>
+        </ul>
+
+        <p class="small" style="margin-top:12px;">Later, this can be upgraded to real AI (OpenAI API) with dynamic schedules.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tips = [
+      {
+        title: "Start with your weakest topic",
+        text: "Spend 20 minutes fixing weak concepts before solving questions. This improves marks faster.",
+        plan: ["30 min: revise one weak chapter", "30 min: practice 10 questions", "10 min: note mistakes"]
+      },
+      {
+        title: "Use active recall",
+        text: "After studying, close notes and explain the topic in your own words. If you can’t, revise again.",
+        plan: ["20 min: study concept", "15 min: explain without notes", "25 min: practice questions"]
+      },
+      {
+        title: "Consistency beats long hours",
+        text: "1 hour daily beats 6 hours one day. Make a small daily target and stick to it.",
+        plan: ["25 min: topic A", "25 min: questions", "10 min: quick revision"]
+      },
+      {
+        title: "Career clarity comes from projects",
+        text: "Pick one path and build a small project. Projects reveal what you actually enjoy and are good at.",
+        plan: ["20 min: learn one concept", "40 min: build small feature", "10 min: write progress notes"]
+      },
+      {
+        title: "Fix mistakes = faster improvement",
+        text: "Your ‘mistake notebook’ is your shortcut. Write why you got it wrong and how to solve it next time.",
+        plan: ["15 min: review mistakes", "30 min: retry incorrect questions", "15 min: revise related concept"]
+      }
+    ];
+
+    function setTip(tip){
+      document.getElementById("tipTitle").textContent = tip.title;
+      document.getElementById("tipText").textContent = tip.text;
+      const ul = document.getElementById("miniPlan");
+      ul.innerHTML = tip.plan.map(x => `<li>${x}</li>`).join("");
+    }
+
+    // Load random tip
+    setTip(tips[Math.floor(Math.random() * tips.length)]);
+
+    document.getElementById("shuffleTip").addEventListener("click", () => {
+      const tip = tips[Math.floor(Math.random() * tips.length)];
+      const box = document.getElementById("aiTipBox");
+      box.classList.remove("pop");
+      void box.offsetWidth; // restart animation
+      box.classList.add("pop");
+      setTip(tip);
+    });
+  </script>
+</body>
+</html>

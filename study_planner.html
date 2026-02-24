@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartPath AI - Study Planner</title>
+
+  <style>
+    :root{
+      --bg0:#0d2327;
+      --bg1:#16353b;
+      --card: rgba(0,0,0,0.26);
+      --card2: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.12);
+      --border2: rgba(255,255,255,0.18);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --accent: #00f0ff;
+      --accentSoft: rgba(0,240,255,0.18);
+      --accentSoft2: rgba(0,240,255,0.10);
+      --shadow: 0 18px 60px rgba(0,0,0,0.25);
+      --danger: rgba(255, 99, 132, 0.22);
+      --warn: rgba(255, 206, 86, 0.22);
+      --ok: rgba(75, 192, 192, 0.22);
+      --ok2: rgba(120, 255, 198, 0.14);
+    }
+
+    /* ✅ Prevent horizontal overflow at 100% zoom */
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 12% 15%, rgba(0,240,255,0.14), transparent 60%),
+        radial-gradient(900px 500px at 82% 60%, rgba(0,240,255,0.10), transparent 62%),
+        radial-gradient(700px 400px at 45% 110%, rgba(0,240,255,0.06), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+
+      /* ✅ Important: don't center vertically (causes overflow issues) */
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+
+      padding: 18px;
+      overflow-x:hidden;
+    }
+
+    /* Ambient moving glow */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-220px;
+      pointer-events:none;
+      background:
+        radial-gradient(700px 320px at 15% 20%, rgba(0,240,255,0.12), transparent 62%),
+        radial-gradient(650px 340px at 90% 25%, rgba(0,240,255,0.08), transparent 62%),
+        radial-gradient(600px 320px at 50% 95%, rgba(0,240,255,0.06), transparent 68%);
+      filter: blur(2px);
+      opacity:.9;
+      animation: floatBg 12s ease-in-out infinite;
+      z-index:-1;
+    }
+    @keyframes floatBg{
+      0%,100%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(-16px, 10px, 0) scale(1.02); }
+    }
+
+    .container{
+      width:100%;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .shell{
+      width:100%;
+      max-width: 980px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+      animation: enter 650ms cubic-bezier(.2,.9,.2,1) both;
+    }
+    @keyframes enter{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Header */
+    .hero{
+      position:relative;
+      padding: 18px 18px 14px;
+      background:
+        radial-gradient(1000px 400px at 40% 0%, rgba(0,240,255,0.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .heroTop{
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 240px;
+      flex: 1;
+    }
+    .logoMark{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,0.65), transparent 55%),
+        linear-gradient(135deg, #00f0ff, #00c4d1);
+      box-shadow: 0 12px 30px rgba(0,240,255,0.12);
+      position:relative;
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .logoMark::after{
+      content:"";
+      position:absolute;
+      inset:-60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+      transform: rotate(25deg) translateX(-40%);
+      animation: sheen 2.8s ease-in-out infinite;
+    }
+    @keyframes sheen{
+      0%,100%{ transform: rotate(25deg) translateX(-60%); opacity:.7; }
+      50%{ transform: rotate(25deg) translateX(60%); opacity:1; }
+    }
+    .brandText h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: .4px;
+    }
+    .brandText p{
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .profile{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      flex: 1;
+      justify-content:flex-end;
+      min-width: min(420px, 100%);
+    }
+
+    .avatar{
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background:
+        radial-gradient(22px 22px at 35% 30%, rgba(255,255,255,0.18), transparent 55%),
+        linear-gradient(135deg, rgba(0,240,255,0.22), rgba(0,240,255,0.08));
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      letter-spacing:.6px;
+      color: rgba(255,255,255,0.92);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+      transition: transform .18s ease;
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .avatar:hover{ transform: translateY(-2px); }
+
+    .nameGrid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      width: min(560px, 100%);
+    }
+
+    .input{
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 14px;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .input::placeholder{ color: rgba(255,255,255,0.55); }
+    .input:focus{
+      border-color: rgba(0,240,255,0.55);
+      box-shadow: 0 0 0 4px rgba(0,240,255,0.10);
+      transform: translateY(-1px);
+    }
+
+    .greeting{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .greeting b{ color: rgba(255,255,255,0.9); }
+    .chip{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.88);
+      font-size: 12px;
+      font-weight: 800;
+      user-select:none;
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(0,240,255,0.10);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); opacity: .9; }
+      50%{ transform: scale(1.25); opacity: 1; }
+    }
+
+    /* Body */
+    .body{ padding: 16px 18px 18px; }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:center;
+      margin-bottom: 12px;
+    }
+    .tabBtn{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.9);
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 900;
+      letter-spacing: .2px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tabBtn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(0,240,255,0.35);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+    .tabBtn.active{
+      border: 0;
+      color: #002e33;
+      background: linear-gradient(135deg, #00f0ff, #00c4d1);
+      box-shadow: 0 14px 36px rgba(0,240,255,0.16), 0 0 0 4px rgba(0,240,255,0.08);
+    }
+
+    .panel{ display:none; animation: panelIn 420ms cubic-bezier(.2,.85,.2,1) both; }
+    .panel.show{ display:block; }
+    @keyframes panelIn{
+      from{ opacity:0; transform: translateY(8px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Actions + Buttons */
+    .actions{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      justify-content:center;
+    }
+    .btn{
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border2);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 11px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 900;
+      letter-spacing: .2px;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, border-color .18s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(0,240,255,0.35);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+    .btn:active{ transform: translateY(0px) scale(0.98); filter: brightness(0.98); }
+    .btn-primary{
+      border: 0;
+      color: #002e33;
+      background: linear-gradient(135deg, #00f0ff, #00c4d1);
+      box-shadow: 0 10px 26px rgba(0,240,255,0.12);
+    }
+    .btn-primary:hover{
+      box-shadow: 0 14px 36px rgba(0,240,255,0.18), 0 0 0 4px rgba(0,240,255,0.08);
+    }
+    .btn-ghost{ background: rgba(255,255,255,0.04); }
+
+    .ripple{
+      position: absolute;
+      border-radius: 999px;
+      transform: scale(0);
+      animation: ripple 520ms ease-out;
+      background: rgba(255,255,255,0.35);
+      pointer-events: none;
+      mix-blend-mode: overlay;
+    }
+    @keyframes ripple{ to { transform: scale(3.2); opacity: 0; } }
+
+    .note{
+      margin-top: 10px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: fadeIn 600ms ease forwards;
+      animation-delay: 120ms;
+    }
+    @keyframes fadeIn{ to { opacity: 1; transform: translateY(0); } }
+
+    /* Manual rows */
+    .row{
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr auto;
+      gap: 10px;
+      margin-top: 12px;
+      align-items:center;
+      width: 100%;
+    }
+
+    /* Upload dropzone */
+    .dropzone{
+      border: 1px dashed rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.035);
+      border-radius: 18px;
+      padding: 16px;
+      text-align:center;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .dropzone:hover{
+      transform: translateY(-2px);
+      border-color: rgba(0,240,255,0.38);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.18);
+    }
+    .dropzone.drag{
+      border-color: rgba(0,240,255,0.62);
+      background: rgba(0,240,255,0.08);
+    }
+    .dzTitle{ font-weight: 950; letter-spacing:.3px; margin: 0 0 6px; }
+    .dzSub{ margin: 0; color: var(--muted); font-size: 13px; }
+    .hintRow{ margin-top: 10px; display:flex; gap: 10px; justify-content:center; flex-wrap: wrap; }
+    .mini{ font-size: 12px; color: var(--muted); }
+
+    /* Result area */
+    .result{
+      margin-top: 18px;
+      display:none;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      border-radius: 18px;
+      padding: 16px;
+      overflow:hidden;
+    }
+    .result.show{
+      display:block;
+      animation: reveal 520ms cubic-bezier(.2,.85,.2,1) both;
+    }
+    @keyframes reveal{
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .summaryGrid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .stat{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      background: var(--card2);
+      transition: transform .18s ease, border-color .18s ease;
+      min-width: 0;
+    }
+    .stat:hover{ transform: translateY(-2px); border-color: rgba(0,240,255,0.22); }
+    .stat .k{ font-size: 12px; color: var(--muted); }
+    .stat .v{ font-size: 18px; font-weight: 950; margin-top: 2px; }
+    .stat .s{ margin-top:6px; font-size:12px; color: rgba(255,255,255,0.78); }
+
+    .pill{
+      display:inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-weight: 950;
+      white-space: nowrap;
+    }
+    .pill.high{ background: var(--danger); }
+    .pill.med{  background: var(--warn); }
+    .pill.low{  background: var(--ok); }
+    .pill.good{ background: var(--ok2); border-color: rgba(120,255,198,0.22); }
+
+    .divider{ height: 1px; background: rgba(255,255,255,0.12); margin: 16px 0; }
+
+    .twoCols{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .box{
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      transition: transform .18s ease, border-color .18s ease;
+      min-width: 0;
+    }
+    .box:hover{ transform: translateY(-2px); border-color: rgba(0,240,255,0.22); }
+    .box p{ margin: 8px 0 0 0; color: var(--muted); }
+    .box h4{ margin:0; }
+    ul{ margin: 8px 0 0 18px; color: var(--muted); }
+
+    /* ✅ TABLE OVERFLOW FIX: wrap table, not the entire page */
+    .tableWrap{
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+    }
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px; /* keeps table readable; scroll inside wrapper if needed */
+    }
+    th, td{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      text-align:left;
+      vertical-align: top;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    td:last-child, th:last-child{
+      white-space: normal; /* allow AI insight to wrap */
+      max-width: 480px;
+    }
+    th{
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(255,255,255,0.04);
+    }
+    tr:last-child td{ border-bottom: 0; }
+
+    .chartWrap{
+      margin-top: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      overflow:hidden;
+    }
+    canvas{ width: 100%; display:block; }
+
+    .footerNote{
+      margin-top: 14px;
+      text-align:center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .warnBox{
+      margin-top: 12px;
+      border: 1px solid rgba(255,206,86,0.28);
+      background: rgba(255,206,86,0.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+      display:none;
+    }
+    .warnBox.show{ display:block; }
+
+    @media (max-width: 980px){
+      .nameGrid{ grid-template-columns: 1fr; }
+      .profile{ justify-content: flex-start; min-width: 100%; }
+      .heroTop{ gap: 12px; }
+    }
+    @media (max-width: 860px){
+      .summaryGrid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .row{ grid-template-columns: 1fr; }
+      .twoCols{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px){
+      body{ padding: 14px; }
+      .shell{ border-radius: 18px; }
+      .brandText h1{ font-size: 16px; }
+      .input{ font-size: 13px; }
+      th, td{ font-size: 13px; }
+      td:last-child, th:last-child{ max-width: 320px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="shell">
+
+      <!-- HERO / PROFILE -->
+      <div class="hero">
+        <div class="heroTop">
+          <div class="brand">
+            <div class="logoMark" aria-hidden="true"></div>
+            <div class="brandText">
+              <h1>AI Study Planner</h1>
+              <p>Smart marks analysis • weak subject detection • visual insights</p>
+            </div>
+          </div>
+
+          <div class="profile">
+            <div class="avatar" id="avatar">SP</div>
+            <div class="nameGrid">
+              <input class="input" id="firstName" placeholder="First Name" autocomplete="given-name" />
+              <input class="input" id="middleName" placeholder="Middle Name" autocomplete="additional-name" />
+              <input class="input" id="lastName" placeholder="Last Name" autocomplete="family-name" />
+            </div>
+          </div>
+        </div>
+
+        <div class="greeting">
+          <div id="greetText">Hello! Enter your name to personalize your marksheet analysis.</div>
+          <div class="chip"><span class="dot"></span><span>AI Mode: Smart Recommendations</span></div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="body">
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tabBtn active" type="button" data-tab="manual">Manual Entry</button>
+          <button class="tabBtn" type="button" data-tab="upload">Upload Marksheet</button>
+        </div>
+
+        <!-- MANUAL PANEL -->
+        <div id="panel-manual" class="panel show">
+          <form id="plannerForm" novalidate>
+            <div id="subjectsWrap"></div>
+
+            <div class="warnBox" id="warnBox"></div>
+
+            <div class="actions">
+              <button type="button" id="addSubjectBtn" class="btn btn-ghost">+ Add Subject</button>
+              <button type="submit" class="btn btn-primary">Analyze</button>
+              <button type="button" id="resetBtn" class="btn btn-ghost">Reset</button>
+              <button type="button" id="exportBtn" class="btn btn-ghost">Export Report</button>
+            </div>
+
+            <div class="note">
+              Add subjects + marks, then click <b>Analyze</b>. It calculates total, percentage, grade, weak subjects, and a chart.
+            </div>
+          </form>
+
+          <div id="result" class="result"></div>
+        </div>
+
+        <!-- UPLOAD PANEL -->
+        <div id="panel-upload" class="panel">
+          <div class="dropzone" id="dropzone">
+            <p class="dzTitle">Upload your Marksheet (CSV / JSON)</p>
+            <p class="dzSub">Drag & drop a file here, or choose a file. We auto-fill subjects and run analysis.</p>
+
+            <div class="hintRow" style="margin-top:12px;">
+              <input id="fileInput" type="file" class="input" style="max-width:520px;" accept=".csv,.json,text/csv,application/json" />
+            </div>
+
+            <div class="hintRow" style="margin-top:12px;">
+              <button type="button" id="useSampleBtn" class="btn btn-ghost">Download Sample CSV</button>
+              <button type="button" id="analyzeUploadedBtn" class="btn btn-primary">Analyze Uploaded File</button>
+            </div>
+
+            <p class="mini" style="margin-top:10px;">
+              CSV: <b>Subject,Marks</b> (header optional). JSON: <b>[{"subject":"Math","marks":78}]</b>
+            </p>
+          </div>
+
+          <div class="footerNote">
+            Tip: After upload, switch to “Manual Entry” to edit subjects before analyzing again.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Button Ripple
+    // =========================
+    function addRipple(e){
+      const btn = e.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + "px";
+      ripple.style.left = (e.clientX - rect.left - size/2) + "px";
+      ripple.style.top  = (e.clientY - rect.top  - size/2) + "px";
+      btn.appendChild(ripple);
+      ripple.addEventListener("animationend", () => ripple.remove());
+    }
+    function enableRipples(){
+      document.querySelectorAll(".btn").forEach(b => {
+        b.removeEventListener("click", addRipple);
+        b.addEventListener("click", addRipple);
+      });
+    }
+
+    // =========================
+    // Helpers
+    // =========================
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+    function safeInt(x, fallback=0){
+      const n = parseInt(String(x).trim(), 10);
+      return Number.isFinite(n) ? n : fallback;
+    }
+    function round1(x){ return Math.round(x * 10) / 10; }
+
+    // =========================
+    // Profile: Name + Avatar + Greeting (localStorage)
+    // =========================
+    const firstNameEl = document.getElementById("firstName");
+    const middleNameEl = document.getElementById("middleName");
+    const lastNameEl = document.getElementById("lastName");
+    const avatarEl = document.getElementById("avatar");
+    const greetEl = document.getElementById("greetText");
+
+    function getFullName(){
+      const f = firstNameEl.value.trim();
+      const m = middleNameEl.value.trim();
+      const l = lastNameEl.value.trim();
+      return [f,m,l].filter(Boolean).join(" ").trim();
+    }
+
+    function initialsFromName(){
+      const f = firstNameEl.value.trim();
+      const l = lastNameEl.value.trim();
+      const m = middleNameEl.value.trim();
+      const parts = [f,m,l].filter(Boolean);
+      if (!parts.length) return "SP";
+      const a = parts[0]?.[0] || "";
+      const b = parts.length > 1 ? (parts[parts.length-1]?.[0] || "") : (parts[0]?.[1] || "");
+      return (a + b).toUpperCase() || "SP";
+    }
+
+    function updateProfileUI(){
+      const name = getFullName();
+      avatarEl.textContent = initialsFromName();
+
+      if (!name) {
+        greetEl.innerHTML = "Hello! Enter your name to personalize your marksheet analysis.";
+      } else {
+        greetEl.innerHTML = `Welcome, <b>${escapeHtml(name)}</b> — upload or enter marks to get your performance report.`;
+      }
+
+      localStorage.setItem("sp_first", firstNameEl.value);
+      localStorage.setItem("sp_middle", middleNameEl.value);
+      localStorage.setItem("sp_last", lastNameEl.value);
+    }
+
+    firstNameEl.value = localStorage.getItem("sp_first") || "";
+    middleNameEl.value = localStorage.getItem("sp_middle") || "";
+    lastNameEl.value = localStorage.getItem("sp_last") || "";
+    updateProfileUI();
+
+    [firstNameEl, middleNameEl, lastNameEl].forEach(el => el.addEventListener("input", updateProfileUI));
+
+    // =========================
+    // Tabs
+    // =========================
+    const tabBtns = [...document.querySelectorAll(".tabBtn")];
+    const panelManual = document.getElementById("panel-manual");
+    const panelUpload = document.getElementById("panel-upload");
+
+    function setTab(tab){
+      tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+      panelManual.classList.toggle("show", tab === "manual");
+      panelUpload.classList.toggle("show", tab === "upload");
+    }
+    tabBtns.forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+
+    // =========================
+    // AI-style Engine (Rule-based)
+    // =========================
+    function priorityFromMarks(m) {
+      if (m < 40) return { level: "High", pill: "high", label: "High Priority" };
+      if (m <= 60) return { level: "Medium", pill: "med", label: "Medium Priority" };
+      return { level: "Low", pill: "low", label: "Low Priority" };
+    }
+    function minutesPerDay(m) { return m < 40 ? 120 : (m <= 60 ? 60 : 30); }
+
+    function gradeFromPercentage(p) {
+      if (p >= 90) return { grade: "A+", improve: "Outstanding. Keep consistency and practice advanced questions." };
+      if (p >= 80) return { grade: "A",  improve: "Very strong. Improve speed + accuracy to reach A+." };
+      if (p >= 70) return { grade: "B+", improve: "Good. Focus more on weak chapters and timed practice." };
+      if (p >= 60) return { grade: "B",  improve: "Average-good. Strengthen concepts and practice daily." };
+      if (p >= 50) return { grade: "C+", improve: "Needs improvement. Revise basics + solve more questions." };
+      if (p >= 40) return { grade: "C",  improve: "Borderline. Make strict routine and revise fundamentals." };
+      return { grade: "F", improve: "Critical. Start from basics, clear doubts, and practice every day." };
+    }
+
+    function performanceFeedback(p) {
+      if (p >= 85) return "Excellent performance. Maintain strengths and polish weak areas only.";
+      if (p >= 70) return "Good performance. With focused revision you can jump one grade higher.";
+      if (p >= 55) return "Average performance. You need consistent practice and concept strengthening.";
+      if (p >= 40) return "Below average. Prioritize weak subjects and revise fundamentals daily.";
+      return "Very weak performance. Start from basics and follow a strict study schedule.";
+    }
+
+    function subjectInsight(subject, marks) {
+      if (marks < 40) return `(${subject}) Build fundamentals: 25m concepts + 60m practice + 15m recap daily.`;
+      if (marks <= 60) return `(${subject}) Improve score: target weak units + practice topic-wise past questions.`;
+      return `(${subject}) Maintain: spaced revision + timed practice once a week.`;
+    }
+
+    function nextSteps(marks) {
+      if (marks < 40) return ["Revise basics (notes + examples)", "Solve 15–25 practice questions/day", "Weekly mini-test (30 mins)"];
+      if (marks <= 60) return ["Identify weak units and target them", "Solve past papers (topic-wise)", "Weekly mock test (45 mins)"];
+      return ["Spaced revision (every 2–3 days)", "Timed practice sets", "Full mock every week"];
+    }
+
+    function identifyWeakSubjects(items) {
+      if (!items.length) return [];
+      const avg = items.reduce((s,x)=>s+x.marks,0)/items.length;
+      const low = items.filter(x => x.marks < 50);
+      const belowAvg = items.filter(x => x.marks <= avg - 10);
+
+      let chosen = [...low, ...belowAvg];
+
+      if (items.length >= 4) {
+        const sorted = [...items].sort((a,b)=>a.marks-b.marks);
+        chosen.push(...sorted.slice(0,2));
+      }
+
+      const seen = new Set();
+      return chosen.filter(x => (seen.has(x.subject) ? false : (seen.add(x.subject), true)));
+    }
+
+    function computeTrend(items){
+      if (!items.length) return { tag:"Balanced", pill:"good", text:"Add subjects to see trend." };
+      const avg = items.reduce((s,x)=>s+x.marks,0)/items.length;
+      const weakCount = items.filter(x => x.marks < 50).length;
+      if (weakCount >= 2) return { tag:"Needs Focus", pill:"med", text:"Multiple subjects are below 50. Prioritize weak subjects first." };
+      if (avg >= 75) return { tag:"Strong", pill:"good", text:"Overall strong performance. Keep revision and timed practice." };
+      return { tag:"Balanced", pill:"good", text:"Decent balance. Improve weak units to raise grade." };
+    }
+
+    // =========================
+    // Chart (No external library)
+    // ✅ FIX: canvas width ALWAYS fits parent (no forced min width overflow)
+    // =========================
+    function drawMarksChart(canvas, labels, marks) {
+      const ctx = canvas.getContext("2d");
+      const parentW = canvas.parentElement.clientWidth || 600;
+
+      // ✅ Ensure canvas never exceeds parent width
+      canvas.width = Math.floor(parentW);
+      canvas.height = 260;
+
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const padding = 48;
+      const chartW = Math.max(120, w - padding * 2);
+      const chartH = Math.max(120, h - padding * 2);
+
+      // axes
+      ctx.strokeStyle = "rgba(255,255,255,0.65)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, h - padding);
+      ctx.lineTo(w - padding, h - padding);
+      ctx.stroke();
+
+      // grid + y labels
+      ctx.font = "12px sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      for (let y = 0; y <= 100; y += 20) {
+        const py = padding + chartH - (y / 100) * chartH;
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.beginPath();
+        ctx.moveTo(padding, py);
+        ctx.lineTo(w - padding, py);
+        ctx.stroke();
+        ctx.fillText(String(y), 10, py + 4);
+      }
+
+      const n = marks.length;
+      if (!n) return;
+
+      const gap = 14;
+      const barW = Math.max(12, (chartW - gap * (n - 1)) / n);
+
+      for (let i = 0; i < n; i++) {
+        const m = marks[i];
+        const barH = (m / 100) * chartH;
+        const x = padding + i * (barW + gap);
+        const y = padding + chartH - barH;
+
+        ctx.fillStyle = "rgba(0, 240, 255, 0.50)";
+        ctx.fillRect(x, y, barW, barH);
+
+        ctx.fillStyle = "rgba(255,255,255,0.95)";
+        ctx.fillText(String(m), x + 4, Math.max(14, y - 8));
+
+        const lab = labels[i].length > 12 ? labels[i].slice(0, 12) + "…" : labels[i];
+        ctx.fillStyle = "rgba(255,255,255,0.88)";
+        ctx.fillText(lab, x, h - padding + 18);
+      }
+    }
+
+    // =========================
+    // Manual UI: dynamic rows
+    // =========================
+    const subjectsWrap = document.getElementById("subjectsWrap");
+    const resultDiv = document.getElementById("result");
+    const addSubjectBtn = document.getElementById("addSubjectBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const form = document.getElementById("plannerForm");
+    const warnBox = document.getElementById("warnBox");
+
+    function createRow(subject = "", marks = "") {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <input class="input" type="text" name="subject" placeholder="Subject Name" value="${escapeHtml(subject)}" required />
+        <input class="input" type="number" name="marks" placeholder="Marks (0-100)" min="0" max="100" value="${escapeHtml(marks)}" required />
+        <button type="button" class="btn btn-ghost removeBtn">Remove</button>
+      `;
+      row.querySelector(".removeBtn").addEventListener("click", () => {
+        if (subjectsWrap.children.length > 1) row.remove();
+      });
+      subjectsWrap.appendChild(row);
+      enableRipples();
+    }
+
+    function showWarn(msg){
+      warnBox.innerHTML = escapeHtml(msg);
+      warnBox.classList.add("show");
+    }
+    function hideWarn(){
+      warnBox.classList.remove("show");
+      warnBox.innerHTML = "";
+    }
+
+    createRow();
+    enableRipples();
+
+    addSubjectBtn.addEventListener("click", () => createRow());
+
+    resetBtn.addEventListener("click", () => {
+      hideWarn();
+      subjectsWrap.innerHTML = "";
+      createRow();
+      resultDiv.classList.remove("show");
+      resultDiv.style.display = "none";
+      resultDiv.innerHTML = "";
+      lastChartData = null;
+      window.removeEventListener("resize", redrawOnResize);
+    });
+
+    // =========================
+    // Analysis render
+    // =========================
+    let lastChartData = null;
+    function redrawOnResize() {
+      if (!lastChartData) return;
+      const canvas = document.getElementById("marksChart");
+      if (!canvas) return;
+      drawMarksChart(canvas, lastChartData.labels, lastChartData.marks);
+    }
+
+    function validateRows(){
+      const rows = [...subjectsWrap.querySelectorAll(".row")];
+      const seen = new Set();
+      for (const r of rows){
+        const subject = r.querySelector('input[name="subject"]').value.trim();
+        const marksRaw = r.querySelector('input[name="marks"]').value;
+        const marks = safeInt(marksRaw, NaN);
+
+        if (!subject) return "Subject name cannot be empty.";
+        if (!Number.isFinite(marks)) return "Marks must be a number.";
+        if (marks < 0 || marks > 100) return "Marks must be between 0 and 100.";
+
+        const key = subject.toLowerCase();
+        if (seen.has(key)) return `Duplicate subject found: "${subject}".`;
+        seen.add(key);
+      }
+      return null;
+    }
+
+    function getItemsFromCurrentRows(){
+      const rows = [...subjectsWrap.querySelectorAll(".row")];
+      return rows.map(r => {
+        const subject = r.querySelector('input[name="subject"]').value.trim();
+        const marks = clamp(safeInt(r.querySelector('input[name="marks"]').value, 0), 0, 100);
+        const pr = priorityFromMarks(marks);
+        return {
+          subject,
+          marks,
+          priority: pr,
+          minsPerDay: minutesPerDay(marks),
+          insight: subjectInsight(subject, marks),
+          steps: nextSteps(marks),
+        };
+      });
+    }
+
+    function renderAnalysis(items){
+      hideWarn();
+      const n = items.length;
+      if (!n){
+        showWarn("Please add at least one subject.");
+        return;
+      }
+
+      const total = items.reduce((s, x) => s + x.marks, 0);
+      const outOf = n * 100;
+      const percentage = outOf === 0 ? 0 : Math.round((total / outOf) * 1000) / 10;
+      const gradeObj = gradeFromPercentage(percentage);
+      const feedback = performanceFeedback(percentage);
+      const weak = identifyWeakSubjects(items);
+
+      const avg = total / n;
+      const best = [...items].sort((a,b)=>b.marks-a.marks)[0];
+      const worst = [...items].sort((a,b)=>a.marks-b.marks)[0];
+      const trend = computeTrend(items);
+
+      const rank = { "High": 0, "Medium": 1, "Low": 2 };
+      const sorted = [...items].sort((a, b) => (rank[a.priority.level] - rank[b.priority.level]) || (a.marks - b.marks));
+
+      const totalDailyMins = items.reduce((s, x) => s + x.minsPerDay, 0);
+      const dailyHours = round1(totalDailyMins / 60);
+
+      const highCount = items.filter(x=>x.priority.level==="High").length;
+      const medCount  = items.filter(x=>x.priority.level==="Medium").length;
+      const lowCount  = items.filter(x=>x.priority.level==="Low").length;
+
+      const tableRows = sorted.map(d => `
+        <tr>
+          <td><b>${escapeHtml(d.subject)}</b></td>
+          <td>${d.marks}</td>
+          <td><span class="pill ${d.priority.pill}">${d.priority.label}</span></td>
+          <td>${d.minsPerDay} min/day</td>
+          <td>${escapeHtml(d.insight)}</td>
+        </tr>
+      `).join("");
+
+      const weakList = weak.length
+        ? `<ul>${weak.map(w => `<li><b>${escapeHtml(w.subject)}</b> (${w.marks}) — Focus this week</li>`).join("")}</ul>`
+        : `<p>No major weak subjects detected. Maintain consistency and revision.</p>`;
+
+      const planBlocks = sorted.map(d => {
+        const hrsWeek = round1(d.minsPerDay * 7 / 60);
+        return `
+          <div class="box">
+            <h4>${escapeHtml(d.subject)} — ${d.minsPerDay} min/day <span class="pill ${d.priority.pill}" style="margin-left:8px;">${d.priority.label}</span></h4>
+            <p style="margin-top:8px;">~${hrsWeek} hrs/week plan</p>
+            <ul>${d.steps.map(s => `<li>${escapeHtml(s)}</li>`).join("")}</ul>
+          </div>
+        `;
+      }).join("");
+
+      const name = getFullName();
+      const heading = name ? `Report for <b>${escapeHtml(name)}</b>` : "AI Performance Report";
+
+      resultDiv.style.display = "block";
+      resultDiv.classList.remove("show");
+      resultDiv.innerHTML = `
+        <h3 style="margin:0 0 8px 0;">${heading}</h3>
+
+        <div class="summaryGrid">
+          <div class="stat">
+            <div class="k">Total Marks</div>
+            <div class="v">${total} / ${outOf}</div>
+            <div class="s">Avg: ${round1(avg)} per subject</div>
+          </div>
+          <div class="stat">
+            <div class="k">Percentage</div>
+            <div class="v">${percentage}%</div>
+            <div class="s">Trend: <span class="pill ${trend.pill}">${trend.tag}</span></div>
+          </div>
+          <div class="stat">
+            <div class="k">Grade</div>
+            <div class="v">${gradeObj.grade}</div>
+            <div class="s">Best: ${escapeHtml(best.subject)} (${best.marks})</div>
+          </div>
+          <div class="stat">
+            <div class="k">Daily Study Load</div>
+            <div class="v">${dailyHours} hrs/day</div>
+            <div class="s">Weakest: ${escapeHtml(worst.subject)} (${worst.marks})</div>
+          </div>
+        </div>
+
+        <div class="twoCols">
+          <div class="box">
+            <h4>Improvement Message</h4>
+            <p>${escapeHtml(gradeObj.improve)}</p>
+          </div>
+          <div class="box">
+            <h4>Performance Feedback</h4>
+            <p>${escapeHtml(feedback)}</p>
+            <p style="margin-top:10px;">${escapeHtml(trend.text)}</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="twoCols">
+          <div class="box">
+            <h4>Priority Breakdown</h4>
+            <ul>
+              <li><b>High:</b> ${highCount} subject(s)</li>
+              <li><b>Medium:</b> ${medCount} subject(s)</li>
+              <li><b>Low:</b> ${lowCount} subject(s)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h4>Quick Next 7 Days</h4>
+            <ul>
+              <li><b>Days 1–3:</b> Focus High priority subjects</li>
+              <li><b>Days 4–5:</b> Improve Medium priority</li>
+              <li><b>Days 6–7:</b> Mixed revision + mock test</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>Marks Chart</h3>
+        <div class="chartWrap">
+          <canvas id="marksChart"></canvas>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>Weak Subjects (AI detected)</h3>
+        ${weakList}
+
+        <div class="divider"></div>
+
+        <h3>Subject-wise Analysis</h3>
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Priority</th>
+                <th>Recommended</th>
+                <th>AI Insight</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>Personalized Weekly Plan</h3>
+        <div class="twoCols">${planBlocks}</div>
+
+        <div class="footerNote">
+          Generated locally (no internet). Tip: Export report to save as file.
+        </div>
+      `;
+
+      requestAnimationFrame(() => resultDiv.classList.add("show"));
+
+      const labels = items.map(x => x.subject);
+      const marks = items.map(x => x.marks);
+      lastChartData = { labels, marks };
+
+      const canvas = document.getElementById("marksChart");
+      drawMarksChart(canvas, labels, marks);
+
+      window.removeEventListener("resize", redrawOnResize);
+      window.addEventListener("resize", redrawOnResize);
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const err = validateRows();
+      if (err){
+        showWarn(err);
+        return;
+      }
+      const items = getItemsFromCurrentRows();
+      renderAnalysis(items);
+      enableRipples();
+    });
+
+    // Export as HTML report
+    exportBtn.addEventListener("click", () => {
+      if (!resultDiv.innerHTML.trim()){
+        showWarn("Analyze first, then export.");
+        return;
+      }
+      const name = getFullName() || "Student";
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Study Planner Report - ${escapeHtml(name)}</title>
+  <style>
+    body{ font-family: system-ui, Arial, sans-serif; padding:16px; max-width:980px; margin:0 auto; }
+    h3{ margin-top: 0; }
+    .card{ border:1px solid #ddd; border-radius:12px; padding:14px; margin-top:12px; }
+    table{ width:100%; border-collapse:collapse; margin-top:12px; }
+    th,td{ border-bottom:1px solid #eee; padding:8px; text-align:left; }
+    th{ background:#fafafa; font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+  </style>
+</head>
+<body>
+  <h2>AI Study Planner Report</h2>
+  <div class="card">
+    ${resultDiv.innerHTML}
+  </div>
+  <p style="margin-top:16px;color:#666;">Saved from SmartPath AI Study Planner.</p>
+</body>
+</html>`;
+      const blob = new Blob([html], { type:"text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `study_report_${name.replace(/\s+/g,"_").toLowerCase()}.html`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // =========================
+    // Upload Marksheet (CSV/JSON) -> fill rows -> analyze
+    // =========================
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const analyzeUploadedBtn = document.getElementById("analyzeUploadedBtn");
+    const useSampleBtn = document.getElementById("useSampleBtn");
+
+    let uploadedData = null;
+
+    function normalizePairs(pairs){
+      const clean = pairs
+        .map(p => ({
+          subject: String(p.subject ?? "").trim(),
+          marks: clamp(safeInt(p.marks, 0), 0, 100)
+        }))
+        .filter(p => p.subject.length > 0);
+
+      if (!clean.length) return null;
+      return clean;
+    }
+
+    function parseCSV(text){
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      if (!lines.length) return null;
+
+      const first = lines[0].toLowerCase();
+      const startIndex = (first.includes("subject") && first.includes("mark")) ? 1 : 0;
+
+      const out = [];
+      for (let i = startIndex; i < lines.length; i++){
+        const parts = lines[i].split(",").map(x => x.trim());
+        if (parts.length < 2) continue;
+        const subject = parts.slice(0, parts.length - 1).join(",").trim();
+        const marks = parts[parts.length - 1].trim();
+        out.push({ subject, marks });
+      }
+      return normalizePairs(out);
+    }
+
+    function parseJSON(text){
+      try{
+        const obj = JSON.parse(text);
+        if (Array.isArray(obj)) return normalizePairs(obj);
+        if (obj && Array.isArray(obj.subjects)) return normalizePairs(obj.subjects);
+        return null;
+      }catch{ return null; }
+    }
+
+    function fillManualRowsFromData(pairs){
+      hideWarn();
+      subjectsWrap.innerHTML = "";
+      pairs.forEach(p => createRow(p.subject, p.marks));
+      if (!pairs.length) createRow();
+      enableRipples();
+    }
+
+    async function readFileAsText(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(file);
+      });
+    }
+
+    async function handleFile(file){
+      if (!file) return;
+
+      const name = file.name.toLowerCase();
+      const text = await readFileAsText(file);
+
+      let parsed = null;
+      if (name.endsWith(".csv") || file.type.includes("csv")) parsed = parseCSV(text);
+      else if (name.endsWith(".json") || file.type.includes("json")) parsed = parseJSON(text);
+      else parsed = parseJSON(text) || parseCSV(text);
+
+      uploadedData = parsed;
+
+      if (!uploadedData){
+        alert("Could not read marksheet. Upload CSV (Subject,Marks) or JSON ([{subject, marks}]).");
+        return;
+      }
+
+      fillManualRowsFromData(uploadedData);
+      setTab("manual");
+    }
+
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try{ await handleFile(file); }
+      catch(err){ console.error(err); alert("Failed to read file."); }
+    });
+
+    analyzeUploadedBtn.addEventListener("click", () => {
+      const err = validateRows();
+      if (err){
+        setTab("manual");
+        showWarn(err);
+        return;
+      }
+      const items = getItemsFromCurrentRows();
+      if (!items.length){ alert("Upload a file first (CSV/JSON)."); return; }
+      renderAnalysis(items);
+      enableRipples();
+      setTab("manual");
+    });
+
+    ["dragenter","dragover"].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add("drag");
+      });
+    });
+    ["dragleave","drop"].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove("drag");
+      });
+    });
+    dropzone.addEventListener("drop", async (e) => {
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) return;
+      try{ await handleFile(file); }
+      catch(err){ console.error(err); alert("Failed to read dropped file."); }
+    });
+
+    useSampleBtn.addEventListener("click", () => {
+      const sample =
+`Subject,Marks
+Mathematics,78
+Science,64
+English,85
+Computer,49
+Social Studies,58
+`;
+      const blob = new Blob([sample], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sample_marksheet.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    enableRipples();
+  </script>
+</body>
+</html>
